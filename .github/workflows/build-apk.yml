@@ -16,8 +16,10 @@ jobs:
           flutter-version: '3.24.5'
           channel: stable
 
-      - name: Scaffold native project (android/)
-        run: flutter create --project-name rajaa --org com.rajaa.app .
+      - name: Scaffold native project in temp dir, then copy android/ + ios/
+        run: |
+          flutter create --project-name rajaa --org com.rajaa.app /tmp/rajaa_scaffold
+          cp -r /tmp/rajaa_scaffold/android /tmp/rajaa_scaffold/ios .
 
       - name: Flutter pub get
         run: flutter pub get
