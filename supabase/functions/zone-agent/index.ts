@@ -2,18 +2,8 @@
 // Core Zone Alert Agent. Receives a location ping, matches active open posts within
 // radius via PostGIS match_zones(), records a dedupe zone_event, and pushes FCM.
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { initializeApp, cert } from 'https://esm.sh/firebase-admin@12';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
-
-let fcmApp: any = null;
-function getFcm() {
-  if (fcmApp) return fcmApp;
-  const raw = Deno.env.get('FIREBASE_ADMIN_SDK');
-  if (!raw) return null;
-  fcmApp = initializeApp({ credential: cert(JSON.parse(raw)) });
-  return fcmApp;
-}
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
@@ -46,7 +36,7 @@ async function pushFcm(token: string, post: any) {
   try {
     const serverKey = Deno.env.get('FCM_SERVER_KEY');
     if (!serverKey) return;
-    const head = {
+    const head: Record<string, string> = {
       'Content-Type': 'application/json',
     };
     head['Authorization'] = 'key=' + serverKey;
