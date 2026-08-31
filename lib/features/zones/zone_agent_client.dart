@@ -18,7 +18,9 @@ class ZoneAgentClient {
   Future<void> start() async {
     final perm = await Geolocator.requestPermission();
     if (perm == LocationPermission.denied) return;
-    _sub = Geolocator.getPositionStream(distanceFilter: 500, accuracy: LocationAccuracy.low).listen(_onPos);
+    _sub = Geolocator.getPositionStream(
+      locationSettings: const LocationSettings(distanceFilter: 500, accuracy: LocationAccuracy.low),
+    ).listen(_onPos);
     // also do an immediate ping
     final p = await Geolocator.getCurrentPosition();
     await _ping(p.latitude, p.longitude);

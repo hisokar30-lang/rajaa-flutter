@@ -4,6 +4,7 @@
 // Feed lists posts sorted by distance then recency. Reads via supabase RLS.
 import 'dart:async';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong2.dart';
 import 'package:geolocator/geolocator.dart';
@@ -88,9 +89,12 @@ class _HomeScreenState extends State<HomeScreen> {
   void _subscribe() {
     _sub = supabase
         .channel('public:posts')
-        .on('postgres_changes',
-            ChannelFilter(event: 'INSERT', schema: 'public', table: 'posts'),
-            (_) => _load())
+        .onPostgresChanges(
+          event: PostgresChangeEvent.insert,
+          schema: 'public',
+          table: 'posts',
+          callback: (_) => _load(),
+        )
         .subscribe();
   }
 

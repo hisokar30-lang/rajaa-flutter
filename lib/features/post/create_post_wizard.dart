@@ -4,6 +4,7 @@
 // client-side before insert (Repository enforces this).
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong2.dart';
 import 'package:image_picker/image_picker.dart';

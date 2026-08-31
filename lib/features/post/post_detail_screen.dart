@@ -2,6 +2,7 @@
 // FR-6: preview, reactions, comments, share deep link, report, contact->chat invite.
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:go_router/go_router.dart';
 import 'package:flutter_map/flutter_map.dart';
 import 'package:latlong2/latlong2.dart';
 import 'package:intl/intl.dart' as intl;
@@ -30,7 +31,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
     ('helpful', 'مفيد', Icons.thumb_up),
     ('hope', 'أمل', Icons.favorite),
     ('saw', 'شاهدته', Icons.visibility),
-    ('boost', 'تعزيز', Icons.boost),
+    ('boost', 'تعزيز', Icons.local_fire_department),
     ('pray', 'دعاء', Icons.volunteer_activism),
   ];
 

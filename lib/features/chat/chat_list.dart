@@ -1,6 +1,7 @@
 // lib/features/chat/chat_list.dart
 // FR-7: list of the current user's chats (RLS: chat_participants).
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import '../../core/constants.dart';
 import '../../core/repository.dart';
 import '../../models/chat.dart';

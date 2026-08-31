@@ -39,7 +39,7 @@ GoRouter buildRouter(WidgetRef ref) {
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
     // Re-evaluate redirects whenever auth state changes.
-    refreshListenable: GoRouterRefreshStream(
+    refreshListenable: StreamListenable(
       supabase.auth.onAuthStateChange.map((e) => e.session?.user),
     ),
     redirect: (BuildContext context, GoRouterState state) {

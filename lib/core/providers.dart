@@ -25,6 +25,9 @@ final categoriesProvider = FutureProvider<List<Category>>((ref) async {
   return Repository.getCategories();
 });
 
+/// Convenience alias used by ProfileScreen.
+final profileProvider = currentUserProfileProvider;
+
 /// True once the current user has a profile row (past onboarding).
 final hasProfileProvider = FutureProvider<bool>((ref) async {
   final user = supabase.auth.currentUser;

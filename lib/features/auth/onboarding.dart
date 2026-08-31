@@ -1,6 +1,7 @@
 // lib/features/auth/onboarding.dart
 // FR-1 onboarding: 3 screens + permission requests (location/notifications/camera).
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
 import 'package:geolocator/geolocator.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:permission_handler/permission_handler.dart';

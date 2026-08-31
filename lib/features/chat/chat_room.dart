@@ -50,22 +50,12 @@ class _ChatRoomScreenState extends ConsumerState<ChatRoomScreen> {
         event: PostgresChangeEvent.insert,
         schema: 'public',
         table: 'messages',
-        filter: PostgresChangeFilter('chat_id', Op.eq, widget.chatId),
         callback: (payload) {
           final m = Message.fromJson(payload.newRecord);
           if (!_msgs.any((x) => x.id == m.id)) {
             setState(() => _msgs = [..._msgs, m]);
             _scrollToEnd();
           }
-        },
-      )
-      ..onPostgresChanges(
-        event: PostgresChangeEvent.update,
-        schema: 'public',
-        table: 'messages',
-        filter: PostgresChangeFilter('chat_id', Op.eq, widget.chatId),
-        callback: (payload) {
-          // typing indicator lives in a separate realtime broadcast
         },
       )
       ..subscribe();
