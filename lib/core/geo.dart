@@ -5,8 +5,8 @@
 import 'dart:convert';
 import 'dart:math' show pi, sin, cos, asin, sqrt;
 import 'dart:typed_data' show ByteData, Endian, Uint8List;
-import 'package:crypto/helpers.dart' show hex;
-import 'package:latlong2/latlong2.dart';
+import 'package:crypto/crypto.dart' show hex;
+import 'package:latlong2/latlong.dart';
 
 /// Parse a PostGIS geography value (any of WKB-hex / WKT / GeoJSON) into LatLng(lat,lng).
 LatLng? parseGeog(dynamic geog) {

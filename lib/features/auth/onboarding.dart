@@ -10,6 +10,7 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase.dart';
 import '../../core/repository.dart';
 import '../../core/constants.dart';
+import '../../models/user_profile.dart';
 
 class OnboardingScreen extends StatefulWidget {
   const OnboardingScreen({super.key});
@@ -39,7 +40,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     setState(() => _busy = true);
     try {
       // Create the profile row (RLS: auth.uid() = id). Onboarding completes here.
-      await Repository.upsertProfile(UserStub(
+      await Repository.upsertProfile(UserProfile(
         id: user.id,
         name: _nameCtrl.text.trim().isEmpty
             ? (user.email?.split('@').first ?? 'مستخدم')
@@ -163,12 +164,4 @@ class _Page extends StatelessWidget {
 }
 
 /// Lightweight profile stub used only to create the row during onboarding.
-class UserStub extends UserProfile {
-  UserStub({
-    required super.id,
-    required super.name,
-    super.email,
-    super.phone,
-    super.city,
-  }) : super();
-}
+/// (We just use UserProfile directly; the stub is removed to avoid an extends bug.)

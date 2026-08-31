@@ -10,10 +10,13 @@ import '../../core/supabase.dart';
 import '../../core/security.dart';
 import '../../models/message.dart';
 
+/// Local alias so the rest of the file can use the short name.
+typedef Message = ChatMessage;
+
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String chatId;
   final String postTitle;
-  const ChatRoomScreen({super.key, required this.chatId, required this.postTitle});
+  const ChatRoomScreen({super.key, required this.chatId, this.postTitle = ''});
 
   @override
   ConsumerState<ChatRoomScreen> createState() => _ChatRoomScreenState();

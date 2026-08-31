@@ -19,7 +19,12 @@ class _NotificationsScreenState extends State<NotificationsScreen> {
   void _load() async {
     final res = await supabase.from('notifications').select().order('created_at', ascending: false).limit(50);
     final prof = await supabase.from('users').select('settings_json').eq('id', supabase.auth.currentUser!.id).maybeSingle();
-    setState(() { _items = res as List; _prefs = {...?(prof?['settings_json'] as Map? ?? {}).cast<String, dynamic>(); });
+    setState(() {
+      _items = res as List;
+      final raw = prof?['settings_json'];
+      final Map<String, dynamic> map = raw is Map ? Map<String, dynamic>.from(raw) : {};
+      _prefs = map;
+    });
   }
   void _toggle(String group, bool v) async {
     _prefs['notif_$group'] = v;

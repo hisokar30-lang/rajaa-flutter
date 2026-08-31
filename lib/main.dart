@@ -34,12 +34,12 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
-GoRouter buildRouter(WidgetRef ref) {
+GoRouter buildRouter(ProviderContainer ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,
     initialLocation: '/home',
     // Re-evaluate redirects whenever auth state changes.
-    refreshListenable: StreamListenable(
+    refreshListenable: GoRouterRefreshStream(
       supabase.auth.onAuthStateChange.map((e) => e.session?.user),
     ),
     redirect: (BuildContext context, GoRouterState state) {

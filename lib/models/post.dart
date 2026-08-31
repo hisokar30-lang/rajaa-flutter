@@ -1,7 +1,7 @@
 // lib/models/post.dart
 // Maps public.posts. The geog column is parsed via lib/core/geo.dart so the map
 // and distance sorting work regardless of how Supabase serializes it.
-import 'package:latlong2/latlong2.dart';
+import 'package:latlong2/latlong.dart';
 import '../core/geo.dart';
 
 enum PostType { lost, found }
