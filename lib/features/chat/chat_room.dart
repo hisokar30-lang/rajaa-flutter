@@ -9,10 +9,10 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase.dart';
 import '../../core/security.dart';
 import '../../models/message.dart';
+import 'verify_flow.dart';
 
 /// Local alias so the rest of the file can use the short name.
 typedef Message = ChatMessage;
-import '../post/verify_flow.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String chatId;
