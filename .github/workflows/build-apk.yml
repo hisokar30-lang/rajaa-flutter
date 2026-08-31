@@ -8,15 +8,12 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: rajaa_flutter
     steps:
       - uses: actions/checkout@v4
 
       - uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.24.x'
+          flutter-version: '3.24.5'
           channel: stable
 
       - name: Flutter pub get
@@ -32,4 +29,4 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: rajaa-android-apk
-          path: rajaa_flutter/build/app/outputs/flutter-apk/app-release.apk
+          path: build/app/outputs/flutter-apk/app-release.apk
