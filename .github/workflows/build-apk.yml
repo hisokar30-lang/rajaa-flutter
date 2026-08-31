@@ -21,37 +21,43 @@ jobs:
           flutter create --project-name rajaa --org com.rajaa.app /tmp/rajaa_scaffold
           cp -r /tmp/rajaa_scaffold/android /tmp/rajaa_scaffold/ios .
 
-      - name: Pin Kotlin + AGP in scaffolded android/ to compatible versions
+      - name: Pin Kotlin 1.9.22 (format-agnostic)
         run: |
           python3 - <<'PY'
-          import re, pathlib
-          # settings.gradle / settings.gradle.kts
+          import pathlib, re
+          KOTLIN='1.9.22'
+          # settings.gradle / .kts : ensure kotlin android plugin pin inside plugins block
           for f in ["android/settings.gradle", "android/settings.gradle.kts"]:
               p = pathlib.Path(f)
               if not p.exists():
                   continue
               t = p.read_text()
-              if "org.jetbrains.kotlin.android" not in t:
-                  # add kotlin plugin pin inside plugins block
-                  t = t.replace('id "dev.flutter.flutter-gradle-plugin"',
-                                'id "dev.flutter.flutter-gradle-plugin"\n        id "org.jetbrains.kotlin.android" version "1.9.22" apply false')
-                  t = t.replace('id("dev.flutter.flutter-gradle-plugin")',
-                                'id("dev.flutter.flutter-gradle-plugin")\n    id("org.jetbrains.kotlin.android") version "1.9.22" apply false')
-              p.write_text(t)
+              if 'org.jetbrains.kotlin.android' not in t:
+                  # insert right after the first occurrence of "plugins {"
+                  t = re.sub(r'plugins\s*\{',
+                             'plugins {\n    id "org.jetbrains.kotlin.android" version "%s" apply false' % KOTLIN,
+                             t, count=1)
+                  p.write_text(t)
+                  print("patched", f)
+              else:
+                  print("kotlin already pinned in", f)
 
-          # root build.gradle / build.gradle.kts: force kotlin version ext
+          # root build.gradle / .kts : force ext.kotlin_version so the app module uses it
           for f in ["android/build.gradle", "android/build.gradle.kts"]:
               p = pathlib.Path(f)
               if not p.exists():
                   continue
               t = p.read_text()
-              if "kotlin_version" not in t and "kotlin" not in t:
-                  t = t.replace("buildscript {",
-                                'buildscript {\n    ext.kotlin_version = "1.9.22"')
-                  t = t.replace('classpath "org.jetbrains.kotlin:kotlin-gradle-plugin',
-                                'classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"')
-              p.write_text(t)
-          print("patched kotlin/agp versions")
+              if 'kotlin_version' not in t:
+                  if 'buildscript {' in t:
+                      t = t.replace('buildscript {',
+                                    'buildscript {\n    ext.kotlin_version = "%s"' % KOTLIN, 1)
+                  else:
+                      t = 'buildscript {\n    ext.kotlin_version = "%s"\n}\n\n' % KOTLIN + t
+                  p.write_text(t)
+                  print("patched", f)
+              else:
+                  print("kotlin_version present in", f)
           PY
 
       - name: Flutter pub get
