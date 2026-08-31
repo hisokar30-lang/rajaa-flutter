@@ -1,12 +1,22 @@
-name: Build Android APK
+name: Build Android APK + Web
 
 on:
   push:
     branches: [main, master]
   workflow_dispatch:
+    inputs:
+      build_web:
+        description: 'Build and deploy web (gh-pages)'
+        type: boolean
+        default: true
+      build_apk:
+        description: 'Build Android APK'
+        type: boolean
+        default: true
 
 jobs:
-  build:
+  android:
+    if: inputs.build_apk != 'false'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -24,25 +34,21 @@ jobs:
       - name: Force Kotlin 1.9.22 everywhere in generated android/
         run: |
           python3 - <<'PY'
-          import pathlib, re, glob
+          import pathlib, re
           KOTLIN='1.9.22'
-          files = []
           for pat in ["android/settings.gradle", "android/settings.gradle.kts",
                       "android/build.gradle", "android/build.gradle.kts",
                       "android/app/build.gradle", "android/app/build.gradle.kts"]:
-              if pathlib.Path(pat).exists():
-                  files.append(pat)
-          for f in files:
-              p = pathlib.Path(f)
+              p = pathlib.Path(pat)
+              if not p.exists():
+                  continue
               t = p.read_text()
-              t2 = re.sub(r'version\\s+["\']1\.\\d+\.\\d+["\'"]', 'version "%s"' % KOTLIN, t)
-              t2 = re.sub(r"kotlin_version\\s*=\\s*['\"]1\\.\\d+\\.\\d+['\"]", 'kotlin_version = "%s"' % KOTLIN, t2)
-              t2 = re.sub(r'kotlin-gradle-plugin:\\$kotlin_version', 'kotlin-gradle-plugin:%s' % KOTLIN, t2)
-              if t2 != t:
-                  p.write_text(t2)
-                  print("patched", f)
-              else:
-                  print("no-change", f)
+              t = re.sub(r'version\s+["\']1\.\d+\.\d+["\']', 'version "%s"' % KOTLIN, t)
+              t = re.sub(r"kotlin_version\s*=\s*['\"]1\.\d+\.\d+['\"]", 'kotlin_version = "%s"' % KOTLIN, t)
+              t = re.sub(r'kotlin-gradle-plugin:\$kotlin_version', 'kotlin-gradle-plugin:%s' % KOTLIN, t)
+              if t != p.read_text():
+                  p.write_text(t)
+                  print("patched", pat)
           PY
 
       - name: Flutter pub get
@@ -61,9 +67,8 @@ jobs:
           path: build/app/outputs/flutter-apk/app-release.apk
 
   web:
+    if: (github.event_name == 'workflow_dispatch' && inputs.build_web != 'false') || (github.event_name == 'push' && github.ref == 'refs/heads/main')
     runs-on: ubuntu-latest
-    needs: [build]
-    if: github.event_name == 'workflow_dispatch' || github.ref == 'refs/heads/main'
     steps:
       - uses: actions/checkout@v4
 
@@ -83,28 +88,17 @@ jobs:
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./build/web
-          commit_message: "Deploy Rajaa web build"
+          commit_message: "Deploy Rajaa web build [skip ci]"
           keep_files: false
           user_name: "github-actions[bot]"
           user_email: "github-actions[bot]@users.noreply.github.com"
 
-      - name: Compute site URL
-        id: site
-        run: |
-          echo "site_url=https://hisokar30-lang.github.io/rajaa-flutter/" >> $GITHUB_OUTPUT
-          echo "branch=gh-pages" >> $GITHUB_OUTPUT
-
-      - name: Enable GitHub Pages (repo setting)
+      - name: Enable / verify GitHub Pages (gh-pages branch)
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            await github.rest.repos.update({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              name: context.repo.repo,
-            });
-            // enable Pages on gh-pages branch
+            // Enable Pages pointing at gh-pages branch if not already active
             const pages = await github.rest.repos.getPages({
               owner: context.repo.owner,
               repo: context.repo.repo,
