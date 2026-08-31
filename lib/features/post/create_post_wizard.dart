@@ -48,7 +48,8 @@ class _CreatePostWizardState extends State<CreatePostWizard> {
   Future<void> _initGeo() async {
     try {
       final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(accuracy: LocationAccuracy.medium),
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 5),
       );
       if (mounted) setState(() => _pin = LatLng(pos.latitude, pos.longitude));
     } catch (_) {}

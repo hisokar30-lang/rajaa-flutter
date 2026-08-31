@@ -53,10 +53,8 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadLocation() async {
     try {
       final pos = await Geolocator.getCurrentPosition(
-        locationSettings: const LocationSettings(
-          accuracy: LocationAccuracy.medium,
-          timeLimit: Duration(seconds: 5),
-        ),
+        desiredAccuracy: LocationAccuracy.medium,
+        timeLimit: const Duration(seconds: 5),
       );
       _center = LatLng(pos.latitude, pos.longitude);
     } catch (_) {

@@ -102,7 +102,7 @@ class _LoginScreenState extends State<LoginScreen>
     try {
       // PKCE/OAuth flow; deep-link callback handled by AndroidManifest intent-filter.
       await supabase.auth.signInWithOAuth(
-        Provider.google,
+        OAuthProvider.google,
         redirectTo: '$kDeepLinkScheme://$kDeepLinkHost/auth',
       );
     } on AuthException catch (e) {

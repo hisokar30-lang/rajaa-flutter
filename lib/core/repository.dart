@@ -249,7 +249,7 @@ class Repository {
             .select('name')
             .eq('id', other.first)
             .maybeSingle();
-        otherName = (u as Map?) != null ? u['name'] as String? : null;
+        otherName = u?['name'] as String?;
       }
       out.add(Chat(
         id: c['id'] as String,

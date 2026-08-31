@@ -53,7 +53,7 @@ class Post {
   // Populated client-side after we know the viewer's location (for feed sort).
   double? distanceM;
 
-  const Post({
+  Post({
     required this.id,
     required this.userId,
     required this.type,

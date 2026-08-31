@@ -12,6 +12,7 @@ import '../../models/message.dart';
 
 /// Local alias so the rest of the file can use the short name.
 typedef Message = ChatMessage;
+import '../post/verify_flow.dart';
 
 class ChatRoomScreen extends ConsumerStatefulWidget {
   final String chatId;

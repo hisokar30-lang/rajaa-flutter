@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import '../../core/supabase.dart';
 import '../../core/providers.dart';
+import '../profile/settings_screen.dart';
 import '../../models/user_profile.dart';
 
 class ProfileScreen extends ConsumerWidget {

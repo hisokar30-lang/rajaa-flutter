@@ -57,7 +57,7 @@ class _PostDetailScreenState extends State<PostDetailScreen> {
       if (mounted) {
         setState(() {
           _post = p;
-          _ownerName = (owner as Map?) != null ? owner['name'] as String? : null;
+          _ownerName = owner?['name'] as String?;
           _comments = List<Map<String, dynamic>>.from(comments as List);
           _loading = false;
         });

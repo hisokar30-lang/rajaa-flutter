@@ -34,6 +34,20 @@ Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
 
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
+/// Listenable that fires whenever Supabase auth state changes (go_router 14 dropped
+/// the built-in GoRouterRefreshStream helper, so we implement a minimal one).
+class StreamListenable extends ChangeNotifier {
+  late final StreamSubscription<void> _sub;
+  StreamListenable(Stream stream) {
+    _sub = stream.listen((_) => notifyListeners());
+  }
+  @override
+  void dispose() {
+    _sub.cancel();
+    super.dispose();
+  }
+}
+
 GoRouter buildRouter(ProviderContainer ref) {
   return GoRouter(
     navigatorKey: _rootNavigatorKey,

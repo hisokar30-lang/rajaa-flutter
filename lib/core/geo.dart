@@ -5,8 +5,16 @@
 import 'dart:convert';
 import 'dart:math' show pi, sin, cos, asin, sqrt;
 import 'dart:typed_data' show ByteData, Endian, Uint8List;
-import 'package:crypto/crypto.dart' show hex;
 import 'package:latlong2/latlong.dart';
+
+/// Local hex decoder (avoids the crypto package's export quirks).
+List<int> _hexDecode(String s) {
+  final out = <int>[];
+  for (var i = 0; i < s.length; i += 2) {
+    out.add(int.parse(s.substring(i, i + 2), radix: 16));
+  }
+  return out;
+}
 
 /// Parse a PostGIS geography value (any of WKB-hex / WKT / GeoJSON) into LatLng(lat,lng).
 LatLng? parseGeog(dynamic geog) {
@@ -42,7 +50,7 @@ LatLng? parseGeog(dynamic geog) {
 
   // WKB hex (little/big endian): byte order + uint32 type + double x + double y
   try {
-    final bytes = hex.decode(s);
+    final bytes = _hexDecode(s);
     if (bytes.length >= 21) {
       final bd = ByteData.sublistView(Uint8List.fromList(bytes));
       final bo = bytes[0];
