@@ -7,17 +7,21 @@ const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers
 
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
-  const body = await req.json();
-  const userId = (req.headers.get('authorization') || '').replace('Bearer ', '').split('.')[0] || body.user_id;
-  const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
-  // verify the JWT to get the real user id
-  const { data: user } = await sb.auth.getUser(body.token ?? (req.headers.get('authorization') || '').replace('Bearer ', ''));
-  const uid = user?.user?.id ?? userId;
-  const r = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/zone-agent`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!}` },
-    body: JSON.stringify({ lat: body.lat, lng: body.lng, user_id: uid }),
-  });
-  const data = await r.json();
-  return new Response(JSON.stringify(data), { status: r.status, headers: cors });
+  try {
+    const body = await req.json();
+    const sb = createClient(Deno.env.get('SUPABASE_URL')!, Deno.env.get('SUPABASE_ANON_KEY')!);
+    // verify the JWT to get the real user id
+    const authHeader = (req.headers.get('authorization') || '').replace('Bearer ', '');
+    const { data: user } = await sb.auth.getUser(body.token ?? authHeader);
+    const uid = user?.user?.id ?? (body.user_id || authHeader.split('.')[0]);
+    const r = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/zone-agent`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!}` },
+      body: JSON.stringify({ lat: body.lat, lng: body.lng, user_id: uid }),
+    });
+    const data = await r.json();
+    return new Response(JSON.stringify(data), { status: r.status, headers: cors });
+  } catch (e: any) {
+    return new Response(JSON.stringify({ error: e.message }), { status: 500, headers: cors });
+  }
 });

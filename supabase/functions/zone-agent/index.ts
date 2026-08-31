@@ -6,6 +6,16 @@ import { initializeApp, cert } from 'https://esm.sh/firebase-admin@12';
 
 const cors = { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Headers': 'authorization, content-type', 'Access-Control-Allow-Methods': 'POST, OPTIONS' };
 
+// Lazily initialize Firebase Admin once.
+let fcmApp: any = null;
+function getFcm() {
+  if (fcmApp) return fcmApp;
+  const raw = Deno.env.get('FIREBASE_ADMIN_SDK');
+  if (!raw) return null;
+  fcmApp = initializeApp({ credential: cert(JSON.parse(raw)) });
+  return fcmApp;
+}
+
 Deno.serve(async (req: Request) => {
   if (req.method === 'OPTIONS') return new Response('ok', { headers: cors });
   try {
@@ -23,7 +33,7 @@ Deno.serve(async (req: Request) => {
     const out: any[] = [];
     for (const m of (matches ?? []) as any[]) {
       // 2) record dedupe zone_event
-      await sb.from('zone_events').upsert({ user_id: userId, post_id: m.post_id }, onConflict: 'user_id,post_id').then(() => {});
+      await sb.from('zone_events').upsert({ user_id: userId, post_id: m.post_id }, { onConflict: 'user_id,post_id' });
       // 3) push FCM to the POST OWNER (not the pinging user) if they opted in
       const owner = await sb.from('users').select('settings_json').eq('id', m.user_id).maybeSingle();
       const fcm = (owner?.data?.settings_json as any)?.fcm_token as string | undefined;
