@@ -21,6 +21,39 @@ jobs:
           flutter create --project-name rajaa --org com.rajaa.app /tmp/rajaa_scaffold
           cp -r /tmp/rajaa_scaffold/android /tmp/rajaa_scaffold/ios .
 
+      - name: Pin Kotlin + AGP in scaffolded android/ to compatible versions
+        run: |
+          python3 - <<'PY'
+          import re, pathlib
+          # settings.gradle / settings.gradle.kts
+          for f in ["android/settings.gradle", "android/settings.gradle.kts"]:
+              p = pathlib.Path(f)
+              if not p.exists():
+                  continue
+              t = p.read_text()
+              if "org.jetbrains.kotlin.android" not in t:
+                  # add kotlin plugin pin inside plugins block
+                  t = t.replace('id "dev.flutter.flutter-gradle-plugin"',
+                                'id "dev.flutter.flutter-gradle-plugin"\n        id "org.jetbrains.kotlin.android" version "1.9.22" apply false')
+                  t = t.replace('id("dev.flutter.flutter-gradle-plugin")',
+                                'id("dev.flutter.flutter-gradle-plugin")\n    id("org.jetbrains.kotlin.android") version "1.9.22" apply false')
+              p.write_text(t)
+
+          # root build.gradle / build.gradle.kts: force kotlin version ext
+          for f in ["android/build.gradle", "android/build.gradle.kts"]:
+              p = pathlib.Path(f)
+              if not p.exists():
+                  continue
+              t = p.read_text()
+              if "kotlin_version" not in t and "kotlin" not in t:
+                  t = t.replace("buildscript {",
+                                'buildscript {\n    ext.kotlin_version = "1.9.22"')
+                  t = t.replace('classpath "org.jetbrains.kotlin:kotlin-gradle-plugin',
+                                'classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"')
+              p.write_text(t)
+          print("patched kotlin/agp versions")
+          PY
+
       - name: Flutter pub get
         run: flutter pub get
 
