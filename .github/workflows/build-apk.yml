@@ -21,43 +21,29 @@ jobs:
           flutter create --project-name rajaa --org com.rajaa.app /tmp/rajaa_scaffold
           cp -r /tmp/rajaa_scaffold/android /tmp/rajaa_scaffold/ios .
 
-      - name: Pin Kotlin 1.9.22 (format-agnostic)
+      - name: Force Kotlin 1.9.22 everywhere in generated android/
         run: |
           python3 - <<'PY'
-          import pathlib, re
+          import pathlib, re, glob
           KOTLIN='1.9.22'
-          # settings.gradle / .kts : ensure kotlin android plugin pin inside plugins block
-          for f in ["android/settings.gradle", "android/settings.gradle.kts"]:
+          files = []
+          for pat in ["android/settings.gradle", "android/settings.gradle.kts",
+                      "android/build.gradle", "android/build.gradle.kts",
+                      "android/app/build.gradle", "android/app/build.gradle.kts"]:
+              if pathlib.Path(pat).exists():
+                  files.append(pat)
+          for f in files:
               p = pathlib.Path(f)
-              if not p.exists():
-                  continue
               t = p.read_text()
-              if 'org.jetbrains.kotlin.android' not in t:
-                  # insert right after the first occurrence of "plugins {"
-                  t = re.sub(r'plugins\s*\{',
-                             'plugins {\n    id "org.jetbrains.kotlin.android" version "%s" apply false' % KOTLIN,
-                             t, count=1)
-                  p.write_text(t)
+              # replace any kotlin version literal (quoted) with 1.9.22
+              t2 = re.sub(r'version\s+["\']1\.\d+\.\d+["\']', 'version "%s"' % KOTLIN, t)
+              t2 = re.sub(r"kotlin_version\s*=\s*['\"]1\.\d+\.\d+['\"]", 'kotlin_version = "%s"' % KOTLIN, t2)
+              t2 = re.sub(r'kotlin-gradle-plugin:\$kotlin_version', 'kotlin-gradle-plugin:%s' % KOTLIN, t2)
+              if t2 != t:
+                  p.write_text(t2)
                   print("patched", f)
               else:
-                  print("kotlin already pinned in", f)
-
-          # root build.gradle / .kts : force ext.kotlin_version so the app module uses it
-          for f in ["android/build.gradle", "android/build.gradle.kts"]:
-              p = pathlib.Path(f)
-              if not p.exists():
-                  continue
-              t = p.read_text()
-              if 'kotlin_version' not in t:
-                  if 'buildscript {' in t:
-                      t = t.replace('buildscript {',
-                                    'buildscript {\n    ext.kotlin_version = "%s"' % KOTLIN, 1)
-                  else:
-                      t = 'buildscript {\n    ext.kotlin_version = "%s"\n}\n\n' % KOTLIN + t
-                  p.write_text(t)
-                  print("patched", f)
-              else:
-                  print("kotlin_version present in", f)
+                  print("no-change", f)
           PY
 
       - name: Flutter pub get
