@@ -98,7 +98,6 @@ jobs:
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            // Enable Pages pointing at gh-pages branch if not already active
             const pages = await github.rest.repos.getPages({
               owner: context.repo.owner,
               repo: context.repo.repo,
